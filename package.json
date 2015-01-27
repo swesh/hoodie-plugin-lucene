@@ -28,6 +28,7 @@
     "url": "https://github.com/appback/hoodie-plugin-lucene/issues"
   },
   "dependencies": {
+    "ports": "1.1.0"
   },
   "peerDependencies": {
     "hoodie-server": ">= 1.2.4"
