@@ -1,0 +1,37 @@
+{
+  "name": "hoodie-plugin-lucene“,
+  "version": “0.0.0”,
+  "description": “Adds lucene indexing to Hoodie”,
+  "author": {
+    "name": "Dale Shaw",
+    "email": "dale@xiatron.com",
+    "url": "https://appback.com"
+  },
+  "contributors": [
+    {
+      "name": "Dale Shaw",
+      "email": "dale@xiatron.com",
+      "url": "https://appback.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appback/hoodie-plugin-lucene/“
+  },
+  "keywords": [
+    "hoodie",
+    “lucene“,
+    "appback"
+  ],
+  "homepage": "http://code.appback.com",
+  "bugs": {
+    "url": "https://github.com/appback/hoodie-plugin-lucene/issues"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "hoodie-server": ">= 1.2.4"
+  },
+  "main": "index.js",
+  "readmeFilename": "README.md"
+}
