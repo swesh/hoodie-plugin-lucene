@@ -11,17 +11,9 @@ var ini = require('ini');
 var exec = require('child_process').exec;
 var lucenePath = '/srv/couchdb-lucene';
 var status = 'Lucene Plugin is running'; //default status
-var couchPort;
 
 // Run in the hoodie context
 module.exports = function (hoodie, cb) {
-    /*
-    *   GET THE COUCH PORT
-    */
-    hoodie.request('get', '_config', {}, function(err, data){
-        couchPort = data.httpd.port;
-    });
-    
     /*
     *   SET THE PROXY HANDLER
     */
@@ -61,14 +53,17 @@ module.exports = function (hoodie, cb) {
     *   RUN THE LUCENE INSTANCE
     */
     function _runLucene(port) {
-        // Apply the latest config
-        var config = ini.parse(fs.readFileSync('couchdb-lucene.ini', 'utf-8'));
-        config.port = port;
-        config.local.url = 'http://localhost:'+couchPort+'/';
-        fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config), {});
-        
-        // Start the service
-        status = 'Lucene plugin is running.'
+        // Get the couch port, apply the config, and start the service
+        hoodie.request('get', '_config', {}, function(err, data){
+            var couchPort = data.httpd.port;
+            var config = ini.parse(fs.readFileSync('couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8'));
+            config.port = port;
+            config.local.url = 'http://localhost:'+couchPort+'/';
+            fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
+            
+            // Start the service
+            status = 'Lucene plugin is running.'
+        });
     }
 
     // Output something useful
