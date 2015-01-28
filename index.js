@@ -10,7 +10,6 @@ var fs = require('fs');
 var ini = require('ini');
 var exec = require('child_process').exec;
 var lucenePath = '/srv/couchdb-lucene';
-var status = 'Lucene Plugin is running'; //default status
 
 // Run in the hoodie context
 module.exports = function (hoodie, cb) {
@@ -43,7 +42,7 @@ module.exports = function (hoodie, cb) {
                     });
                 } else {
                     // Notify
-                    status = 'Lucene is missing.  Please install to '+lucenePath+' and restart the app.';
+                    console.log('Lucene is missing.  Please install to '+lucenePath+' and restart the app.');
                 }
             });
         }
@@ -57,18 +56,24 @@ module.exports = function (hoodie, cb) {
         hoodie.request('get', '_config', {}, function(err, data){
             var couchPort = data.httpd.port;
             var config = ini.parse(fs.readFileSync('couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8'));
-            config.port = port;
+            config.lucene.port = port;
             config.local.url = 'http://localhost:'+couchPort+'/';
             fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
             
-            // Start the service
-            status = 'Lucene plugin is running.'
+            var luceneProcess = exec('couchdb-lucene/bin/run', function (error, stdout, stderr) {
+                if (error) {
+                    console.log(error.stack);
+                    console.log('Error code: '+error.code);
+                    console.log('Signal received: '+error.signal);
+                } else {
+                    console.log('Child Process STDOUT: '+stdout);
+                    console.log('Child Process STDERR: '+stderr);
+                    if (!stderr) console.log('Lucene plugin is running');
+                }
+            });
         });
     }
 
-    // Output something useful
-    console.log(status);
-    
     // Hoodie Callback
     cb();
 }
