@@ -6,7 +6,10 @@
 var ports = require('ports');
 var appName = require('../../package.json').name;
 var port = ports.getPort(appName+'-hoodie-plugin-lucene');
+var couchConfig = require('../../data/config.json').couchdb;
 var fs = require('fs');
+var serverBinPath = require('path').dirname(require.main.filename);
+var appPath = serverBinPath.replace('node_modules/hoodie-server/bin','');
 var ini = require('ini');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
@@ -29,7 +32,7 @@ module.exports = function (hoodie, cb) {
     *   installed to /srv/couchdb-lucene
     *   and that the files are accessible
     */
-    fs.exists('couchdb-lucene', function(exists) {
+    fs.exists(appPath+'data/couchdb-lucene', function(exists) {
         if (exists) {
             // Configure and start the instance
             _runLucene(port);
@@ -38,7 +41,7 @@ module.exports = function (hoodie, cb) {
             fs.exists(lucenePath, function(exists) {
                 if (exists) {
                     // Copy the files to the plugin directory
-                    exec('cp -R '+lucenePath+' couchdb-lucene', function (error, stdout, stderr) {
+                    exec('cp -R '+lucenePath+' '+appPath+'data/couchdb-lucene', function (error, stdout, stderr) {
                         // Configure and start the instance
                         _runLucene(port);
                     });
@@ -57,12 +60,12 @@ module.exports = function (hoodie, cb) {
         // Get the couch port, apply the config, and start the service
         hoodie.request('get', '_config', {}, function(err, data){
             var couchPort = data.httpd.port;
-            var config = ini.parse(fs.readFileSync('couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8'));
+            var config = ini.parse(fs.readFileSync(appPath+'data/couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8'));
             config.lucene.port = port;
-            config.local.url = 'http://localhost:'+couchPort+'/';
-            fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
+            config.local.url = 'http://'+couchConfig.username+':'+encodeURIComponent(couchConfig.password)+'@localhost:'+couchPort+'/';
+            fs.writeFileSync(appPath+'data/couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
             
-            luceneProcess = spawn('couchdb-lucene/bin/run');
+            luceneProcess = spawn(appPath+'data/couchdb-lucene/bin/run');
             
             //listen for exit
             luceneProcess.on('close', function (code) {
