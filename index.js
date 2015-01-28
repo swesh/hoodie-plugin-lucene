@@ -9,6 +9,7 @@ var port = ports.getPort(appName+'-hoodie-plugin-lucene');
 var fs = require('fs');
 var ini = require('ini');
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var lucenePath = '/srv/couchdb-lucene';
 
 // Run in the hoodie context
@@ -60,16 +61,11 @@ module.exports = function (hoodie, cb) {
             config.local.url = 'http://localhost:'+couchPort+'/';
             fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
             
-            var luceneProcess = exec('couchdb-lucene/bin/run', function (error, stdout, stderr) {
-                if (error) {
-                    console.log(error.stack);
-                    console.log('Error code: '+error.code);
-                    console.log('Signal received: '+error.signal);
-                } else {
-                    console.log('Child Process STDOUT: '+stdout);
-                    console.log('Child Process STDERR: '+stderr);
-                    if (!stderr) console.log('Lucene plugin is running');
-                }
+            var luceneProcess = spawn('couchdb-lucene/bin/run');
+            
+            //listen for exit
+            luceneProcess.on('close', function (code) {
+               console.log('Lucene process exited with exit code '+code);
             });
         });
     }
