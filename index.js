@@ -11,6 +11,7 @@ var ini = require('ini');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var lucenePath = '/srv/couchdb-lucene';
+var luceneProcess;
 
 // Run in the hoodie context
 module.exports = function (hoodie, cb) {
@@ -61,7 +62,7 @@ module.exports = function (hoodie, cb) {
             config.local.url = 'http://localhost:'+couchPort+'/';
             fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
             
-            var luceneProcess = spawn('couchdb-lucene/bin/run');
+            luceneProcess = spawn('couchdb-lucene/bin/run');
             
             //listen for exit
             luceneProcess.on('close', function (code) {
@@ -69,6 +70,10 @@ module.exports = function (hoodie, cb) {
             });
         });
     }
+    
+    process.on('exit', function() {
+        if (luceneProcess) luceneProcess.kill();
+    });
 
     // Hoodie Callback
     cb();
