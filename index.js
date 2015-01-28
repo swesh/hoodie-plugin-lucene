@@ -9,12 +9,19 @@ var port = ports.getPort(appName+'-hoodie-plugin-lucene');
 var fs = require('fs');
 var ini = require('ini');
 var exec = require('child_process').exec;
-var couchPort = ini.parse(fs.readFileSync('./node_modules/hoodie-plugin-lucene/couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8')).httpd.port;
 var lucenePath = '/srv/couchdb-lucene';
 var status = 'Lucene Plugin is running'; //default status
+var couchPort;
 
 // Run in the hoodie context
 module.exports = function (hoodie, cb) {
+    /*
+    *   GET THE COUCH PORT
+    */
+    hoodie.request('get', '_config', {}, function(err, data){
+        couchPort = data.httpd.port;
+    });
+    
     /*
     *   SET THE PROXY HANDLER
     */
@@ -29,7 +36,7 @@ module.exports = function (hoodie, cb) {
     *   installed to /srv/couchdb-lucene
     *   and that the files are accessible
     */
-    fs.exists('./node_modules/hoodie-plugin-lucene/couchdb-lucene', function(exists) {
+    fs.exists('couchdb-lucene', function(exists) {
         if (exists) {
             // Configure and start the instance
             _runLucene(port);
@@ -38,7 +45,7 @@ module.exports = function (hoodie, cb) {
             fs.exists(lucenePath, function(exists) {
                 if (exists) {
                     // Copy the files to the plugin directory
-                    exec('cp -R '+lucenePath+' ./node_modules/hoodie-plugin-lucene/couchdb-lucene', function (error, stdout, stderr) {
+                    exec('cp -R '+lucenePath+' couchdb-lucene', function (error, stdout, stderr) {
                         // Configure and start the instance
                         _runLucene(port);
                     });
@@ -55,10 +62,10 @@ module.exports = function (hoodie, cb) {
     */
     function _runLucene(port) {
         // Apply the latest config
-        var config = ini.parse(fs.readFileSync('./node_modules/hoodie-plugin-lucene/couchdb-lucene/conf/couchdb-lucene.ini', 'utf-8'));
+        var config = ini.parse(fs.readFileSync('couchdb-lucene.ini', 'utf-8'));
         config.port = port;
         config.local.url = 'http://localhost:'+couchPort+'/';
-        fs.writeFileSync('./node_modules/hoodie-plugin-lucene/couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config));
+        fs.writeFileSync('couchdb-lucene/conf/couchdb-lucene.ini', ini.stringify(config), {});
         
         // Start the service
         status = 'Lucene plugin is running.'
