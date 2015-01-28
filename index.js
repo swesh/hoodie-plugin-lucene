@@ -70,10 +70,6 @@ module.exports = function (hoodie, cb) {
             });
         });
     }
-    
-    process.on('exit', function() {
-        if (luceneProcess) luceneProcess.kill();
-    });
 
     // Hoodie Callback
     cb();
