@@ -17,7 +17,7 @@ var lucenePath = '/opt/couchdb-lucene';
 var luceneProcess;
 var configItems = [
     ['couchdb/os_process_timeout/','60000'],
-    ['external/fti/','/usr/bin/python "/home/hoodiehost/apps/test-011715a/data/couchdb-lucene/tools/couchdb-external-hook.py --remote-port '+port+'"'],
+    ['external/fti/','/usr/bin/python "'+appPath+'/data/couchdb-lucene/tools/couchdb-external-hook.py --remote-port '+port+'"'],
     ['httpd_db_handlers/_fti/','{couch_httpd_external, handle_external_req, <<"fti">>}']
 ];
 
