@@ -13,7 +13,7 @@ var appPath = serverBinPath.replace('node_modules/hoodie-server/bin','');
 var ini = require('ini');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var lucenePath = '/srv/couchdb-lucene';
+var lucenePath = '/opt/couchdb-lucene';
 var luceneProcess;
 var configItems = [
     ['couchdb/os_process_timeout/','60000'],
