@@ -15,8 +15,31 @@
         <h1>Lucene</h1>
         
         <p>
-        The lucene plugin is running.
+        This Lucene Plugin allows for the use of lucene indexing and queries within your app.  The current implementation supports use of the _fti endpoint within plugins though corresponding database indexing functions.
         </p>
+        <pre>
+            <code>
+            {
+                "_id":"_design/foo",
+                "fulltext": {
+                    "by_subject": {
+                        "index":"function(doc) { var ret=new Document(); ret.add(doc.subject); return ret }"
+                    },
+                    "by_content": {
+                        "index":"function(doc) { var ret=new Document(); ret.add(doc.content); return ret }"
+                    }
+                }
+            }
+            </code>
+        </pre>
+        <pre>
+            <code>
+            http://host/database/_fti/_design/foo/by_subject?q=hello
+            http://host/database/_fti/_design/foo/by_content?q=hello
+            </code>
+        </pre>
+        
+        
     </div>
     <script src="/_api/_plugins/_assets/scripts/admin-dashboard-uikit.js"></script>
     <script src="assets/vendor/underscore-min.js"></script>

@@ -15,16 +15,26 @@ var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var lucenePath = '/srv/couchdb-lucene';
 var luceneProcess;
+var configItems = [
+    {"couchdb/os_process_timeout/":"60000"},
+    {"external/_fti/":"/usr/bin/python \"/home/hoodiehost/apps/test-011715a/data/couchdb-lucene/tools/couchdb-external-hook.py --remote-port "+port+"\""},
+    {"httpd_global_handlers/_fti/":"{couch_httpd_external, handle_external_req, <<\"fti\">>}"}
+];
+
+
 
 // Run in the hoodie context
 module.exports = function (hoodie, cb) {
     /*
-    *   SET THE PROXY HANDLER
+    *   SET THE COUCHDB CONFIG
     */
-    var value = '{couch_httpd_proxy, handle_proxy_req, <<"http://127.0.0.1:'+port+'">>}';
-    hoodie.request('PUT', '_config/httpd_global_handlers/_fti/', {data:JSON.stringify(value)},function(err, data){
-        if (err) console.log(err);
-    });
+    _setConfig(0);
+    function _setConfig(i) {
+        hoodie.request('PUT', '_config/'+configItems[i][0], {data:JSON.stringify(configItems[i][1])},function(err, data){
+            if (err) console.log(err);
+            if (configItems.length-1 > i) _setConfig(i+1);
+        });
+    }
     
     /*
     *   SETUP THE LUCENE INSTANCE
